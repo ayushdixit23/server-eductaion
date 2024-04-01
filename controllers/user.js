@@ -3,6 +3,8 @@ const Course = require("../models/course")
 require("dotenv").config()
 const jwt = require("jsonwebtoken");
 const Media = require("../models/media");
+const Conversation = require("../models/conversation");
+const Message = require("../models/message");
 const uuid = require("uuid").v4;
 
 function generateAccessToken(data) {
@@ -86,8 +88,26 @@ exports.getUsers = async (req, res) => {
 	try {
 		const { id } = req.params
 		const users = await User.find({ _id: { $ne: id } }).select("-password");
-		// console.log(users)
-		res.status(200).json({ success: true, users })
+		let msg = []
+		for (let i = 0; i < users.length; i++) {
+			const conver = await Conversation.findOne({ participants: { $all: [id, users[i]._id] } })
+			const conversation = (conver && conver.message && conver.message.length > 0) ? conver.message[conver?.message?.length - 1] : null
+			let message
+			if (conversation) {
+				message = await Message.findById(conversation)
+			} else {
+				message = {
+					message: `Start a new Conversation with`
+				}
+			}
+			msg.push(message)
+		}
+		const userwithmsg = users.map((d, i) => {
+			return {
+				...d.toObject(), message: msg[i]
+			}
+		})
+		res.status(200).json({ success: true, users: userwithmsg })
 	} catch (error) {
 		console.log(error)
 		res.status(400).json({
@@ -133,11 +153,10 @@ exports.addcontenttoCourse = async (req, res) => {
 	try {
 		const { id } = req.params
 		const { title, desc } = req.body
+		console.log()
 		const course = await Course.findById(id)
 		const image = req.file
-		const currentDate = new Date(Date.now());
-		const hours = currentDate.getHours();
-		const minutes = currentDate.getMinutes();
+
 		const objectName = `${image.originalname}`
 		if (!course) {
 			return res.status(400).json({ success: false, message: "Course Not Found!" })
@@ -194,6 +213,36 @@ exports.fetchCoursesbyUser = async (req, res) => {
 			return res.status(200).json({ success: true, courses: [] })
 		}
 		res.status(200).json({ success: true, courses })
+	} catch (error) {
+		res.status(400).json({ success: false, message: "Something went wrong..." });
+		console.log(error)
+	}
+}
+
+exports.fetchCoursesbyId = async (req, res) => {
+	try {
+		const { id } = req.params
+		const courses = await Course.findById(id).populate("medias")
+		if (!courses) {
+			return res.status(200).json({ success: true, courses: "" })
+		}
+		res.status(200).json({ success: true, courses })
+	} catch (error) {
+		res.status(400).json({ success: false, message: "Something went wrong..." });
+		console.log(error)
+	}
+}
+
+exports.fetchVideos = async (req, res) => {
+	try {
+		const { id } = req.params
+		const media = await Media.findById(id)
+		if (!media) {
+			return res.status(200).json({ success: true, media: "" })
+		}
+		const course = await Course.findById(media.course)
+		const courses = { name: course.title, image: course.media.content, desc: course.desc }
+		res.status(200).json({ success: true, media, courses })
 	} catch (error) {
 		res.status(400).json({ success: false, message: "Something went wrong..." });
 		console.log(error)
