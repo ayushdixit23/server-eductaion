@@ -15,6 +15,33 @@ app.use(express.static("uploads"))
 app.use("/api", userRoutes)
 app.use("/api/chats", chatRoutes)
 
+const LANGUAGE_MODEL_API_KEY = process.env.LANGUAGE_MODEL_API_KEY;
+const LANGUAGE_MODEL_URL = `https://generativelanguage.googleapis.com/v1beta1/models/chat-bison-001:generateMessage?key=${LANGUAGE_MODEL_API_KEY}`;
+
+app.get("/prompt/:text", async (req, res) => {
+	try {
+		const text = req.params.text;
+
+		const payload = {
+			prompt: { messages: [{ content: text }] },
+			temperature: 0.1,
+			candidate_count: 1,
+		};
+		const response = await fetch(LANGUAGE_MODEL_URL, {
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(payload),
+			method: "POST",
+		});
+		const data = await response.json();
+		console.log(data);
+		res.send(data);
+	} catch (error) {
+		console.log(error)
+	}
+});
+
 const connectDB = async () => {
 	try {
 		mongoose
@@ -32,6 +59,6 @@ const connectDB = async () => {
 connectDB();
 
 
-server.listen(5000, () => {
+server.listen(8000, () => {
 	console.log('Server started on port 5000');
 });

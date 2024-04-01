@@ -22,7 +22,8 @@ function generateRefreshToken(data) {
 
 exports.createuser = async (req, res) => {
 	try {
-		const { fullname, password, email, dp, role } = req.body
+		const { fullname, password, email, role } = req.body
+		const dp = `${req.file.originalname}`
 
 		const userExists = await User.findOne({ email });
 		if (userExists) {
@@ -32,7 +33,8 @@ exports.createuser = async (req, res) => {
 			fullname, password, email, dp, role
 		})
 		const saved = await user.save()
-		const data = { id: saved._id, fullname: saved.fullname, dp: saved.dp, role: user.role }
+
+		const data = { id: saved._id, fullname: saved.fullname, dp: "http://localhost:8000/" + saved.dp, role: user.role }
 		const access_token = generateAccessToken(data)
 		const refresh_token = generateRefreshToken(data)
 
@@ -57,7 +59,7 @@ exports.loguser = async (req, res) => {
 		} else {
 			const data = {
 				fullname: user.fullname,
-				dp: user.dp,
+				dp: "http://localhost:8000/" + user.dp,
 				id: user._id.toString(),
 				role: user.role
 			};

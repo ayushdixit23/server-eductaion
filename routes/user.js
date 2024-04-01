@@ -4,7 +4,7 @@ const { upload } = require("../middleware/multer")
 
 const router = express.Router()
 
-router.post("/createuser", createuser)
+router.post("/createuser", upload.single("image"), createuser)
 router.post("/login", loguser)
 router.get("/v1/getUsers/:id", getUsers)
 router.post("/createCourse", upload.single("image"), createCourse)
