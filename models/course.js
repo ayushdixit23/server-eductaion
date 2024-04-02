@@ -4,7 +4,7 @@ const Course = new mongoose.Schema({
 	createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 	title: { type: String },
 	desc: { type: String },
-	price: { type: Number },
+	price: { type: String },
 	media: { content: { type: String }, type: { type: String } },
 	content: { type: String },
 	medias: [{ type: mongoose.Schema.Types.ObjectId, ref: "Media" }],
