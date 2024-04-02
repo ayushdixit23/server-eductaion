@@ -1,5 +1,5 @@
 const express = require("express")
-const { createuser, loguser, getUsers, createCourse, addcontenttoCourse, deleteContentFromCourse, fetchCourses, fetchCoursesbyUser, fetchCoursesbyId, fetchVideos } = require("../controllers/user")
+const { createuser, loguser, getUsers, createCourse, addcontenttoCourse, deleteContentFromCourse, fetchCourses, fetchCoursesbyUser, fetchCoursesbyId, fetchVideos, deleteCourse } = require("../controllers/user")
 const { upload } = require("../middleware/multer")
 
 const router = express.Router()
@@ -14,5 +14,6 @@ router.get("/v1/allcourses", fetchCourses)
 router.get("/getcourses/:id", fetchCoursesbyUser)
 router.get("/fetchCoursesbyId/:id", fetchCoursesbyId)
 router.get("/fetchVideos/:id", fetchVideos)
+router.delete("/deleteCourse/:id", deleteCourse)
 
 module.exports = router

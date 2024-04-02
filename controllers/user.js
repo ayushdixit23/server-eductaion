@@ -250,8 +250,23 @@ exports.fetchVideos = async (req, res) => {
 			return res.status(200).json({ success: true, media: "" })
 		}
 		const course = await Course.findById(media.course)
-		const courses = { name: course.title, image: course.media.content, desc: course.desc, content: course.content }
+		const courses = { name: course.title, image: course.media.content, desc: course.desc, content: course.content, price: course.price }
 		res.status(200).json({ success: true, media, courses })
+	} catch (error) {
+		res.status(400).json({ success: false, message: "Something went wrong..." });
+		console.log(error)
+	}
+}
+
+exports.deleteCourse = async (req, res) => {
+	try {
+		const { id } = req.params
+		const course = await Course.findById(id)
+		for (let i = 0; i < course.medias.length; i++) {
+			await Media.findByIdAndDelete(course.medias[i])
+		}
+		await Course.findByIdAndDelete(id)
+		res.status(200).json({ success: true, message: "Course Deleted" })
 	} catch (error) {
 		res.status(400).json({ success: false, message: "Something went wrong..." });
 		console.log(error)
