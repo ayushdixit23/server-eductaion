@@ -152,20 +152,29 @@ exports.createCourse = async (req, res) => {
 exports.addcontenttoCourse = async (req, res) => {
 	try {
 		const { id } = req.params
-		const { title, desc } = req.body
-		console.log()
-		const course = await Course.findById(id)
-		const image = req.file
+		const { title, desc, ytlink } = req.body
 
-		const objectName = `${image.originalname}`
+		let media
+		let savedmedia
+		const course = await Course.findById(id)
 		if (!course) {
 			return res.status(400).json({ success: false, message: "Course Not Found!" })
 		}
-		const media = new Media({
-			title, desc, course: id,
-			media: { type: image.mimetype, content: objectName }
-		})
-		const savedmedia = await media.save()
+		if (req.file) {
+			const image = req.file
+			const objectName = `${image.originalname}`
+			media = new Media({
+				title, desc, course: id,
+				media: { type: image.mimetype, content: objectName }
+			})
+			savedmedia = await media.save()
+		} else {
+			media = new Media({
+				title, desc, course: id,
+				ytlink
+			})
+			savedmedia = await media.save()
+		}
 
 		if (course.medias && course.medias.length > 0) {
 			course.medias.push(savedmedia._id)
