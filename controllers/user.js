@@ -171,7 +171,7 @@ exports.addcontenttoCourse = async (req, res) => {
 		} else {
 			media = new Media({
 				title, desc, course: id,
-				ytlink
+				ytlink, isExternalLink: true
 			})
 			savedmedia = await media.save()
 		}
@@ -250,7 +250,7 @@ exports.fetchVideos = async (req, res) => {
 			return res.status(200).json({ success: true, media: "" })
 		}
 		const course = await Course.findById(media.course)
-		const courses = { name: course.title, image: course.media.content, desc: course.desc }
+		const courses = { name: course.title, image: course.media.content, desc: course.desc, content: course.content }
 		res.status(200).json({ success: true, media, courses })
 	} catch (error) {
 		res.status(400).json({ success: false, message: "Something went wrong..." });
